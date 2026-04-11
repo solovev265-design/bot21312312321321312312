@@ -247,8 +247,8 @@ for event in longpoll.listen():
 
                 msg = (
                     "🚶 Вы выбрали: Тротуарные дорожки\n\n"
-                    f"📌 Вариант 1 — Стандартный: {PRICES['trotuar'][1]['price']} руб/м²\n"
-                    f"📌 Вариант 2 — Улучшенный:  {PRICES['trotuar'][2]['price']} руб/м²\n\n"
+                    f"📌 Вариант 1 — Эконом: {PRICES['trotuar'][1]['price']} руб/м²\n"
+                    f"📌 Вариант 2 — Стандарт:  {PRICES['trotuar'][2]['price']} руб/м²\n\n"
                     "Выберите вариант:"
                 )
                 # Каждый вариант — своя картинка
@@ -267,8 +267,8 @@ for event in longpoll.listen():
 
                 msg = (
                     "🚗 Вы выбрали: Парковка\n\n"
-                    f"📌 Вариант 1 — Стандартный: {PRICES['parkovka'][1]['price']} руб/м²\n"
-                    f"📌 Вариант 2 — Усиленный:   {PRICES['parkovka'][2]['price']} руб/м²\n\n"
+                    f"📌 Вариант 1 — Эконом: {PRICES['parkovka'][1]['price']} руб/м²\n"
+                    f"📌 Вариант 2 — Стандарт:   {PRICES['parkovka'][2]['price']} руб/м²\n\n"
                     "Выберите вариант:"
                 )
                 send_message(user_id, msg, keyboard=kb,
