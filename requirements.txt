@@ -1,0 +1,2 @@
+vk-api
+yadisk==1.2.19
