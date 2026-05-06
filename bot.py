@@ -14,7 +14,6 @@ YADISK_TOKEN = "y0__xDB5ISCAhjblgMg7bvogxcwrP2v8gdD_maYFxg9V3Opg1DgOWyvgan1Kw"
 # Инициализация Яндекс.Диска
 yd = yadisk.YaDisk(token=YADISK_TOKEN)
 
-# Проверка подключения
 try:
     if yd.check_token():
         print("✅ Яндекс.Диск подключен успешно!")
@@ -49,6 +48,60 @@ PRICES = {
     }
 }
 
+# ================= ОПИСАНИЯ ВАРИАНТОВ =================
+DESCRIPTIONS = {
+    'trotuar': {
+        1: (
+            "Выемка грунта – 30-50 см\n"
+            "1 - Тротуарная плитка бетонная, размеры 200х100х40 мм, "
+            "цвет «Серый», «Ложковая укладка» - 40 мм\n"
+            "2 - Песчано-цементная смесь марки М50 - 50 мм\n"
+            "3 - Геотекстиль нетканый плотностью не менее 100 г/м²\n"
+            "4 - ОПГС с высоким содержанием гравия – 300 мм\n"
+            "5 - Геотекстиль нетканый плотностью не менее 200 г/м²\n"
+            "6 - Уплотненный грунт, Купл. не менее 0.95"
+        ),
+        2: (
+            "Выемка грунта – 30-50 см\n"
+            "1 - Тротуарная плитка бетонная, размеры 200х100х60 мм, "
+            "цвет «Серый», «Ложковая укладка» - 60 мм\n"
+            "2 - Песчано-цементная смесь марки М50 - 50 мм\n"
+            "3 - Геотекстиль нетканый плотностью не менее 100 г/м²\n"
+            "4 - Щебень фракции 20-40 мм М800 - 150 мм\n"
+            "5 - Геотекстиль нетканый плотностью не менее 200 г/м²\n"
+            "6 - Песок природный мелкий с содержанием пылевидных "
+            "и глинистых частиц менее 5% - 150 мм\n"
+            "7 - Уплотненный грунт, Купл. не менее 0.95"
+        )
+    },
+    'parkovka': {
+        1: (
+            "Выемка грунта – 30-50 см\n"
+            "1 - Тротуарная плитка бетонная, размеры 200х100х60 мм, "
+            "цвет «Серый», «Ложковая укладка» - 80 мм\n"
+            "2 - Песчано-цементная смесь - 50 мм\n"
+            "3 - Геотекстиль нетканый плотностью не менее 200 г/м²\n"
+            "4 – Бой бетона фракции 20-40 мм М800 - 200 мм\n"
+            "5 - Геотекстиль нетканый плотностью не менее 200 г/м²\n"
+            "6 - Песок природный мелкий с содержанием пылевидных "
+            "и глинистых частиц менее 5% - 200 мм\n"
+            "7 - Уплотненный грунт, Купл. не менее 0.95"
+        ),
+        2: (
+            "Выемка грунта – 30-50 см\n"
+            "1 - Тротуарная плитка бетонная, размеры 200х100х80 мм, "
+            "цвет «Серый», «Ложковая укладка» - 80 мм\n"
+            "2 - Песчано-цементная смесь - 50 мм\n"
+            "3 - Геотекстиль нетканый плотностью не менее 200 г/м²\n"
+            "4 - Щебень фракции 20-40 мм М800 - 200 мм\n"
+            "5 - Геотекстиль нетканый плотностью не менее 200 г/м²\n"
+            "6 - Песок природный мелкий с содержанием пылевидных "
+            "и глинистых частиц менее 5% - 200 мм\n"
+            "7 - Уплотненный грунт, Купл. не менее 0.95"
+        )
+    }
+}
+
 # =============================================
 vk_session = vk_api.VkApi(token=TOKEN)
 vk = vk_session.get_api()
@@ -57,7 +110,6 @@ longpoll = VkLongPoll(vk_session)
 users_state = {}
 
 def get_user_name(user_id):
-    """Получает имя пользователя из ВК"""
     try:
         user_info = vk.users.get(user_ids=user_id)[0]
         return user_info.get('first_name', '')
@@ -80,7 +132,6 @@ def send_message(user_id, text, keyboard=None, attachment=None):
     vk.messages.send(**params)
 
 def save_to_yadisk(data):
-    """Сохраняет XML на Яндекс.Диске"""
     try:
         folder_path = "/Заказы_XML"
         if not yd.exists(folder_path):
@@ -93,12 +144,10 @@ def save_to_yadisk(data):
         root = ET.Element("Order")
         root.set("date", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
-        # Клиент
         client_el = ET.SubElement(root, "Client")
         ET.SubElement(client_el, "Name").text    = str(data.get('name', ''))
         ET.SubElement(client_el, "VK_ID").text   = str(data.get('vk_id', ''))
 
-        # Услуга
         service_el = ET.SubElement(root, "Service")
         ET.SubElement(service_el, "Type").text        = str(data.get('service', ''))
         ET.SubElement(service_el, "Variant").text     = str(data.get('variant', ''))
@@ -107,21 +156,18 @@ def save_to_yadisk(data):
         ET.SubElement(service_el, "PricePerSqm").text = str(data.get('price_per_sqm', 0))
         ET.SubElement(service_el, "AreaCost").text    = str(data.get('cost_area', 0))
 
-        # Бордюр тротуарный
         curb1_el = ET.SubElement(root, "CurbTrotuar")
         ET.SubElement(curb1_el, "Name").text         = PRICES['bordur'][1]['name']
         ET.SubElement(curb1_el, "Length").text        = str(data.get('curb1_length', 0))
         ET.SubElement(curb1_el, "PricePerMeter").text = str(PRICES['bordur'][1]['price'])
         ET.SubElement(curb1_el, "Cost").text          = str(data.get('cost_curb1', 0))
 
-        # Бордюр дорожный
         curb2_el = ET.SubElement(root, "CurbDorozh")
         ET.SubElement(curb2_el, "Name").text         = PRICES['bordur'][2]['name']
         ET.SubElement(curb2_el, "Length").text        = str(data.get('curb2_length', 0))
         ET.SubElement(curb2_el, "PricePerMeter").text = str(PRICES['bordur'][2]['price'])
         ET.SubElement(curb2_el, "Cost").text          = str(data.get('cost_curb2', 0))
 
-        # Итого
         ET.SubElement(root, "TotalPrice").text = str(data.get('total_price', 0))
 
         tree = ET.ElementTree(root)
@@ -140,7 +186,6 @@ def save_to_yadisk(data):
         return None
 
 def build_confirm_message(user_data):
-    """Формирует итоговое сообщение с расчётом"""
     return (
         f"📋 ПРОВЕРЬТЕ ДАННЫЕ:\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n"
@@ -245,7 +290,9 @@ for event in longpoll.listen():
                 msg = (
                     "🚶 Вы выбрали: Тротуар\n\n"
                     f"📌 Вариант 1 — Бюджетный: {PRICES['trotuar'][1]['price']} руб/м²\n"
-                    f"📌 Вариант 2 — Средний:    {PRICES['trotuar'][2]['price']} руб/м²\n\n"
+                    f"{DESCRIPTIONS['trotuar'][1]}\n\n"
+                    f"📌 Вариант 2 — Средний: {PRICES['trotuar'][2]['price']} руб/м²\n"
+                    f"{DESCRIPTIONS['trotuar'][2]}\n\n"
                     "Выберите вариант:"
                 )
                 send_message(user_id, msg, keyboard=kb,
@@ -263,7 +310,9 @@ for event in longpoll.listen():
                 msg = (
                     "🚗 Вы выбрали: Парковка\n\n"
                     f"📌 Вариант 1 — Бюджетный: {PRICES['parkovka'][1]['price']} руб/м²\n"
-                    f"📌 Вариант 2 — Средний:    {PRICES['parkovka'][2]['price']} руб/м²\n\n"
+                    f"{DESCRIPTIONS['parkovka'][1]}\n\n"
+                    f"📌 Вариант 2 — Средний: {PRICES['parkovka'][2]['price']} руб/м²\n"
+                    f"{DESCRIPTIONS['parkovka'][2]}\n\n"
                     "Выберите вариант:"
                 )
                 send_message(user_id, msg, keyboard=kb,
