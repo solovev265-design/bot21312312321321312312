@@ -23,10 +23,10 @@ except:
     print("❌ Не удалось подключиться к Яндекс.Диску")
 
 # ================= ФОТОГРАФИИ =================
-PHOTO_TROTUAR_1 = "photo-212080985_457239107"
+PHOTO_TROTUAR_1 = "photo-212080985_457239100"
 PHOTO_TROTUAR_2 = "photo-212080985_457239102"
 
-PHOTO_PARKOVKA_1 = "photo-212080985_457239101"
+PHOTO_PARKOVKA_1 = "photo-212080985_457239107"
 PHOTO_PARKOVKA_2 = "photo-212080985_457239103"
 
 PHOTO_BORDUR_TROTUAR = "photo-212080985_457239097"
