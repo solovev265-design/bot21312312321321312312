@@ -9,7 +9,7 @@ import io
 
 # ================= НАСТРОЙКИ =================
 TOKEN = "vk1.a.cxQlfisAwdBvPfNmGh09jnediBSne4XgJPGR_mA3nN22S9VAi6KVb7POzCEfpuFGVpWLPCGtD597JXplVsxSVZxvwiUx3w3y39ZUANVGaEhB8yZFX_gr7rr_HrNNsSZsS-8JSbYTd-3ANRpYmAQuPz-iKN8z9meWCPmE7T7Cr_g6ivduoZ54KBnT5Oz8t8WZYy1sFyNJW2pkKmqHraseSw"
-YADISK_TOKEN = "y0__xDB5ISCAhjblgMg7bvogxcwrP2v8gdD_maYFxg9V3Opg1DgOWyvgan1Kw"  # Получить на https://yandex.ru/dev/disk/poligon/
+YADISK_TOKEN = "y0__xDB5ISCAhjblgMg7bvogxcwrP2v8gdD_maYFxg9V3Opg1DgOWyvgan1Kw"
 
 # Инициализация Яндекс.Диска
 yd = yadisk.YaDisk(token=YADISK_TOKEN)
@@ -27,26 +27,25 @@ except:
 PHOTO_TROTUAR_1 = "photo-212080985_457239100"
 PHOTO_TROTUAR_2 = "photo-212080985_457239102"
 
-
 PHOTO_PARKOVKA_1 = "photo-212080985_457239101"
 PHOTO_PARKOVKA_2 = "photo-212080985_457239103"
 
-PHOTO_BORDUR_TROTUAR   = "photo-212080985_457239097"
+PHOTO_BORDUR_TROTUAR = "photo-212080985_457239097"
 PHOTO_BORDUR_DOROZH = "photo-212080985_457239096"
 
 # ================= ЦЕНЫ =================
 PRICES = {
     'trotuar': {
-        1: {'price': 5600, 'name': 'Эконом'},
-        2: {'price': 5900, 'name': 'Стандартный'},
+        1: {'price': 5600, 'name': 'Бюджетный'},
+        2: {'price': 5900, 'name': 'Средний'},
     },
     'parkovka': {
-        1: {'price': 6400, 'name': 'Эконом'},
-        2: {'price': 7000, 'name': 'Стандартный'}
+        1: {'price': 6400, 'name': 'Бюджетный'},
+        2: {'price': 7000, 'name': 'Средний'}
     },
     'bordur': {
-        1: {'price': 1200, 'name': 'Тротуарный'},   # ← обновлено
-        2: {'price': 2000, 'name': 'Дорожный'}       # ← обновлено
+        1: {'price': 1200, 'name': 'Тротуарный'},
+        2: {'price': 2000, 'name': 'Дорожный'}
     }
 }
 
@@ -57,7 +56,6 @@ longpoll = VkLongPoll(vk_session)
 
 users_state = {}
 
-
 def get_user_name(user_id):
     """Получает имя пользователя из ВК"""
     try:
@@ -65,7 +63,6 @@ def get_user_name(user_id):
         return user_info.get('first_name', '')
     except:
         return ''
-
 
 def send_message(user_id, text, keyboard=None, attachment=None):
     params = {
@@ -82,9 +79,8 @@ def send_message(user_id, text, keyboard=None, attachment=None):
         params["attachment"] = attachment
     vk.messages.send(**params)
 
-
 def save_to_yadisk(data):
-    """Сохраняет XML на Яндекс.Диск"""
+    """Сохраняет XML на Яндекс.Диске"""
     try:
         folder_path = "/Заказы_XML"
         if not yd.exists(folder_path):
@@ -99,8 +95,8 @@ def save_to_yadisk(data):
 
         # Клиент
         client_el = ET.SubElement(root, "Client")
-        ET.SubElement(client_el, "Name").text  = str(data.get('name', ''))
-        ET.SubElement(client_el, "Phone").text = str(data.get('phone', ''))
+        ET.SubElement(client_el, "Name").text    = str(data.get('name', ''))
+        ET.SubElement(client_el, "VK_ID").text   = str(data.get('vk_id', ''))
 
         # Услуга
         service_el = ET.SubElement(root, "Service")
@@ -143,42 +139,40 @@ def save_to_yadisk(data):
         print(f"❌ Ошибка загрузки на Яндекс.Диск: {e}")
         return None
 
-
 def build_confirm_message(user_data):
     """Формирует итоговое сообщение с расчётом"""
     return (
         f"📋 ПРОВЕРЬТЕ ДАННЫЕ:\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n"
         f"👤 Имя: {user_data['name']}\n"
-        f"📱 Телефон: {user_data['phone']}\n"
+        f"🆔 VK ID: {user_data['vk_id']}\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n"
         f"🛠 Услуга: {user_data['service']}\n"
-        f"   └ {user_data['variant_name']} (Вариант {user_data['variant']})\n"
+        f"  └ {user_data['variant_name']} (Вариант {user_data['variant']})\n"
         f"📐 Площадь: {user_data['area']} м² × {user_data['price_per_sqm']} руб = "
         f"{int(user_data['cost_area'])} руб\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n"
         f"🧱 Бордюр тротуарный: {user_data['curb1_length']} м × "
         f"{PRICES['bordur'][1]['price']} руб = {int(user_data['cost_curb1'])} руб\n"
-        f"🧱 Бордюр дорожный:   {user_data['curb2_length']} м × "
+        f"🧱 Бордюр дорожный: {user_data['curb2_length']} м × "
         f"{PRICES['bordur'][2]['price']} руб = {int(user_data['cost_curb2'])} руб\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n"
         f"💰 ИТОГО: {int(user_data['total_price'])} руб.\n\n"
         f"Всё верно?"
     )
 
-
 print("🤖 Бот успешно запущен и готов к работе!")
 
-# ===== ОСНОВНОЙ ЦИКЛ БОТА =====
+# ===== ОСНОВНОЙ ЦИКЛ РАБОТЫ БОТА =====
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-        user_id    = event.user_id
-        text       = event.text.strip()
+        user_id = event.user_id
+        text = event.text.strip()
         text_lower = text.lower()
 
         # ===== НАЧАЛО ДИАЛОГА =====
         if user_id not in users_state or text_lower in ['начать', 'start', 'привет', 'назад', 'заново']:
-            users_state[user_id] = {'step': 'ask_name'}
+            users_state[user_id] = {'step': 'ask_name', 'vk_id': user_id}
             vk_name = get_user_name(user_id)
 
             if vk_name:
@@ -207,51 +201,53 @@ for event in longpoll.listen():
         if step == 'ask_name':
             if 'да' in text_lower and user_data.get('vk_name'):
                 user_data['name'] = user_data['vk_name']
-                user_data['step'] = 'ask_phone'
-                send_message(user_id, f"Отлично, {user_data['name']}!\nТеперь введите ваш номер телефона:")
+                user_data['step'] = 'ask_service'
+
+                kb = VkKeyboard(one_time=True)
+                kb.add_button('🚶 Тротуар', color=VkKeyboardColor.PRIMARY)
+                kb.add_line()
+                kb.add_button('🚗 Парковка', color=VkKeyboardColor.PRIMARY)
+                send_message(user_id, f"Отлично, {user_data['name']}!\nКакую услугу будем рассчитывать?", keyboard=kb)
             elif text_lower == 'ввести другое имя':
                 user_data['step'] = 'enter_custom_name'
                 send_message(user_id, "Введите ваше имя:", keyboard=VkKeyboard.get_empty_keyboard())
             else:
                 user_data['name'] = text
-                user_data['step'] = 'ask_phone'
-                send_message(user_id, f"Приятно познакомиться, {text}!\nТеперь введите ваш номер телефона:")
+                user_data['step'] = 'ask_service'
+
+                kb = VkKeyboard(one_time=True)
+                kb.add_button('🚶 Тротуар', color=VkKeyboardColor.PRIMARY)
+                kb.add_line()
+                kb.add_button('🚗 Парковка', color=VkKeyboardColor.PRIMARY)
+                send_message(user_id, f"Приятно познакомиться, {text}!\nКакую услугу будем рассчитывать?", keyboard=kb)
 
         elif step == 'enter_custom_name':
             user_data['name'] = text
-            user_data['step'] = 'ask_phone'
-            send_message(user_id, f"Приятно познакомиться, {text}!\nТеперь введите ваш номер телефона:")
-
-        # ===== ШАГ 2: ТЕЛЕФОН =====
-        elif step == 'ask_phone':
-            user_data['phone'] = text
-            user_data['step']  = 'ask_service'
+            user_data['step'] = 'ask_service'
 
             kb = VkKeyboard(one_time=True)
-            kb.add_button('🚶 Тротуарные дорожки', color=VkKeyboardColor.PRIMARY)
+            kb.add_button('🚶 Тротуар', color=VkKeyboardColor.PRIMARY)
             kb.add_line()
             kb.add_button('🚗 Парковка', color=VkKeyboardColor.PRIMARY)
-            send_message(user_id, "Отлично! Какую услугу будем рассчитывать?", keyboard=kb)
+            send_message(user_id, f"Приятно познакомиться, {text}!\nКакую услугу будем рассчитывать?", keyboard=kb)
 
-        # ===== ШАГ 3: ВЫБОР УСЛУГИ =====
+        # ===== ШАГ 2: ВЫБОР УСЛУГИ =====
         elif step == 'ask_service':
-            if 'тротуар' in text_lower or 'дорожк' in text_lower:
-                user_data['service']     = 'Тротуарные дорожки'
+            if 'тротуар' in text_lower:
+                user_data['service']     = 'Тротуар'
                 user_data['service_key'] = 'trotuar'
                 user_data['step']        = 'ask_variant'
 
-                # ── Только 2 варианта ──
                 kb = VkKeyboard(one_time=True)
                 kb.add_button('Вариант 1', color=VkKeyboardColor.SECONDARY)
                 kb.add_button('Вариант 2', color=VkKeyboardColor.SECONDARY)
 
                 msg = (
-                    "🚶 Вы выбрали: Тротуарные дорожки\n\n"
-                    f"📌 Вариант 1 — Эконом: {PRICES['trotuar'][1]['price']} руб/м²\n"
-                    f"📌 Вариант 2 — Стандарт:  {PRICES['trotuar'][2]['price']} руб/м²\n\n"
+                    "🚶 Вы выбрали: Тротуар\n\n"
+                    f"📌 Вариант 1 — Бюджетный: {PRICES['trotuar'][1]['price']} руб/м²\n"
+                    f"📌 Вариант 2 — Средний:    {PRICES['trotuar'][2]['price']} руб/м²\n\n"
                     "Выберите вариант:"
                 )
-                # Каждый вариант — своя картинка
                 send_message(user_id, msg, keyboard=kb,
                              attachment=f"{PHOTO_TROTUAR_1},{PHOTO_TROTUAR_2}")
 
@@ -260,15 +256,14 @@ for event in longpoll.listen():
                 user_data['service_key'] = 'parkovka'
                 user_data['step']        = 'ask_variant'
 
-                # ── 2 варианта ──
                 kb = VkKeyboard(one_time=True)
                 kb.add_button('Вариант 1', color=VkKeyboardColor.SECONDARY)
                 kb.add_button('Вариант 2', color=VkKeyboardColor.SECONDARY)
 
                 msg = (
                     "🚗 Вы выбрали: Парковка\n\n"
-                    f"📌 Вариант 1 — Эконом: {PRICES['parkovka'][1]['price']} руб/м²\n"
-                    f"📌 Вариант 2 — Стандарт:   {PRICES['parkovka'][2]['price']} руб/м²\n\n"
+                    f"📌 Вариант 1 — Бюджетный: {PRICES['parkovka'][1]['price']} руб/м²\n"
+                    f"📌 Вариант 2 — Средний:    {PRICES['parkovka'][2]['price']} руб/м²\n\n"
                     "Выберите вариант:"
                 )
                 send_message(user_id, msg, keyboard=kb,
@@ -276,7 +271,7 @@ for event in longpoll.listen():
             else:
                 send_message(user_id, "Пожалуйста, выберите услугу с помощью кнопок.")
 
-        # ===== ШАГ 3.x: ВЫБОР ВАРИАНТА =====
+        # ===== ШАГ 3: ВЫБОР ВАРИАНТА =====
         elif step == 'ask_variant':
             variant = None
             if '1' in text:
@@ -378,7 +373,7 @@ for event in longpoll.listen():
                     f"📊 ИТОГОВЫЙ РАСЧЁТ:\n"
                     f"━━━━━━━━━━━━━━━━━━━━━\n"
                     f"👤 Клиент: {user_data['name']}\n"
-                    f"📱 Телефон: {user_data['phone']}\n"
+                    f"🆔 VK ID: {user_data['vk_id']}\n"
                     f"━━━━━━━━━━━━━━━━━━━━━\n"
                     f"🛠 {user_data['service']} — {user_data['variant_name']}\n"
                     f"📐 Площадь: {user_data['area']} м² × "
@@ -395,7 +390,10 @@ for event in longpoll.listen():
                     f"💰 ИТОГО К ОПЛАТЕ: {int(user_data['total_price'])} руб.\n"
                     f"━━━━━━━━━━━━━━━━━━━━━\n\n"
                 )
-         
+                result_msg += (
+                    f"✅ Заявка сохранена: {filename}\n" if filename
+                    else "⚠️ Ошибка сохранения на Яндекс.Диск\n"
+                )
                 result_msg += (
                     "Наш специалист свяжется с вами в ближайшее время.\n\n"
                     "💡 Чтобы сделать новый расчёт, напишите «Начать»"
@@ -405,7 +403,7 @@ for event in longpoll.listen():
                 del users_state[user_id]
 
             elif 'повторить' in text_lower or '🔄' in text:
-                users_state[user_id] = {'step': 'ask_name'}
+                users_state[user_id] = {'step': 'ask_name', 'vk_id': user_id}
                 vk_name = get_user_name(user_id)
 
                 if vk_name:
